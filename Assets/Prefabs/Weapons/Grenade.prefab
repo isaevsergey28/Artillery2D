@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d017c7e57ac812d40968dcb39903ea98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _damage: 40
+  _damage: 60
   _explosionPrefab: {fileID: 7967256258423195941, guid: d4e47b1477e74f0409b252b96e4fa262,
     type: 3}
   _power: 60

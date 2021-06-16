@@ -109,8 +109,8 @@ public class BotBehaviour : MonoBehaviour
             BotMovement.onCanAttackWitchColdWeapon -= AttackWithColdWeapon;
             BotMovement.onCanAttackWitchExplosiveWeapon -= AttackWithExplosiveWeapon;
             Participant.onDeath -= DestoyParticipant;
-            _allParticipants.DeleteParticipant(participant);
             _allParticipants.DecrementAllWalkNumbers(participant);
+            _allParticipants.DeleteParticipant(participant);
             Destroy(this.gameObject);
 
         }

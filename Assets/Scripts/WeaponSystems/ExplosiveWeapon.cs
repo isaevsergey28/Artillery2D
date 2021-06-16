@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Linq;
 
 public abstract class ExplosiveWeapon : Weapon
 {
@@ -69,7 +70,7 @@ public abstract class ExplosiveWeapon : Weapon
 
     private void CheckDistanceToPlayers(Collider2D other)
     {
-        foreach (var participant in _allParticipants.GetParticipants())
+        foreach (var participant in _allParticipants.GetParticipants().ToList())
         {
             float distance = Vector2.Distance(transform.position, participant.gameObject.transform.position);
             distance *= _damageDistance;

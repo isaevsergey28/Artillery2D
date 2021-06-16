@@ -14,13 +14,7 @@ public class Player : Participant
     {
         GameRound.onRoundStart += IsPlayerWalks;
         Participant.onDeath += DestroyPlayer;
-        foreach (var participant in _allParticipants.GetParticipants())
-        {
-            if(participant.TryGetComponent<Bot>(out Bot bot))
-            {
-                Physics2D.IgnoreCollision(participant.GetComponent<BoxCollider2D>(), GetComponent<BoxCollider2D>(), true);
-            }
-        }
+        
     }
     private void OnDisable()
     {

@@ -16,6 +16,6 @@ public class BotInfoIndicator : InfoIndicator
     }
     private void UpdateIndicator(int health)
     {
-        _nickname.text = "Bot" + _botNumber++ + " " + health + "HP";
+        _nickname.text = "Bot" + _botNumber + " " + health + "HP";
     }
 }
