@@ -2,19 +2,48 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Participant
 {
-    [SerializeField] private int _health;
-    public void GiveDamage(int damage)
+    public delegate void OnPlayerWalks(bool flag);
+    public static event OnPlayerWalks onPlayerWalks;
+
+    public delegate void OnPlayerDeath();
+    public static OnPlayerDeath onPlayerDeath;
+
+    private void Start()
     {
-        _health -= damage;
-        CheckAlive();
-    }
-    private void CheckAlive()
-    {
-        if (_health <= 0)
+        GameRound.onRoundStart += IsPlayerWalks;
+        Participant.onDeath += DestroyPlayer;
+        foreach (var participant in _allParticipants.GetParticipants())
         {
-            Destroy(this.gameObject);
+            if(participant.TryGetComponent<Bot>(out Bot bot))
+            {
+                Physics2D.IgnoreCollision(participant.GetComponent<BoxCollider2D>(), GetComponent<BoxCollider2D>(), true);
+            }
+        }
+    }
+    private void OnDisable()
+    {
+        GameRound.onRoundStart -= IsPlayerWalks;
+        Participant.onDeath -= DestroyPlayer;
+    }
+    private void IsPlayerWalks(int round)
+    {
+        if(round == _walkNumber)
+        {
+            onPlayerWalks?.Invoke(true);
+        }
+        else
+        {
+            onPlayerWalks?.Invoke(false);
+        }
+    }
+    private void DestroyPlayer(Participant participant)
+    {
+        if(participant.TryGetComponent<Player>(out Player player))
+        {
+            participant.GiveDamage(-50);
+            onPlayerDeath?.Invoke();
         }
     }
 }

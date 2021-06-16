@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
 public class GameRound : MonoBehaviour
 {
     [SerializeField] private GameObject _roundTextObject;
@@ -12,15 +10,28 @@ public class GameRound : MonoBehaviour
     
     public delegate void OnChangeState(bool flag);
     public static event OnChangeState onChangeState;
+
+    public delegate void OnRoundStart(int roundNumber);
+    public static event OnRoundStart onRoundStart;
     
     private Text _roundText;
     private RoundState _roundState;
     private float _seconds;
+    private int _roundNumber = 0;
+    private AllParticipants _allParticipants;
+
     private void Start()
     {
         _roundText = _roundTextObject.GetComponent<Text>();
         _roundState = RoundState.Pause;
-        Projectile.onProjectileDestroy += StopRound; 
+        ExplosiveWeapon.onExplosiveWeaponDestroy += StopRound;
+        ColdWeapon.onColdWeaponDestroy += StopRound;
+        _allParticipants = GameObject.FindObjectOfType<AllParticipants>();
+    }
+    private void OnDisable()
+    {
+        ExplosiveWeapon.onExplosiveWeaponDestroy -= StopRound;
+        ColdWeapon.onColdWeaponDestroy -= StopRound;
     }
     public void StartRound()
     {
@@ -28,8 +39,17 @@ public class GameRound : MonoBehaviour
         _roundState = RoundState.Start;
         _roundText.text = _roundTime.ToString();
         onChangeState?.Invoke(false);
+        if (_roundNumber == _allParticipants.GetParticipants().Count)
+        {
+            _roundNumber = 0;
+        }
+        _roundNumber++;
+        onRoundStart.Invoke(_roundNumber);
     }
-
+    public int GetRoundNumber()
+    {
+        return _roundNumber;
+    }
     private void Update()
     {
         if (_roundState == RoundState.Start)

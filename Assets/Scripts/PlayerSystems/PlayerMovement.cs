@@ -3,53 +3,43 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : Movement
 {
-    [SerializeField] private int _speed;
-    [SerializeField] private LayerMask _groundCheckLayerMask;
-    [SerializeField] private Transform _groundCheckTransform;
-    [SerializeField] protected float _jumpPower;
-    [SerializeField] protected float _forceUp;
-    [SerializeField] protected float _sideForce;
+   
 
-    private Rigidbody2D _rigidbody;
-    private SpriteRenderer _spriteRenderer;
-    private int _direction;
     private float _doubleClickTimeLimit = 0.25f;
     private bool _grounded = true;
     private bool _isWantJump = false;
-    private bool _isInAir = false;
     private bool _isProjectileActive = false;
     private Camera _mainCamera;
     private bool _isPausedGame = false;
-    private PhotonView _photonView;
+
     private void Start()
     {
         _mainCamera = Camera.main;
         _rigidbody = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
-        Projectile.onProjectileActive += SetProjectileActivity;
+        ExplosiveWeapon.onExplosiveWeaponActive += SetProjectileActivity;
         GameRound.onChangeState += IsRoundChangeState;
-        _photonView = GetComponent<PhotonView>();
+    }
+    private void OnDisable()
+    {
+        ExplosiveWeapon.onExplosiveWeaponActive -= SetProjectileActivity;
+        GameRound.onChangeState -= IsRoundChangeState;
     }
     private void FixedUpdate()
     {
-        if (!EventSystem.current.IsPointerOverGameObject())
+        if (!EventSystem.current.currentSelectedGameObject)
         {
-            if (_isProjectileActive == false && _isPausedGame == false)
+            if (_isProjectileActive == false && _isPausedGame == false && _isMyTurn)
             {
                 CheckForAction();
                 UpdateGroundedStatus();
             }
-
             FlipSprite();
         }
     }
-    public void ThrowAway(Vector2 explosionPos, int power)
-    {
-        Vector2 direction = (Vector2)transform.position - explosionPos;
-        GetComponent<Rigidbody2D>().velocity = direction * power;
-    }
+
     private void CheckForAction()
     {
         StartCoroutine(CheckFirstClick());
@@ -65,12 +55,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void MovePlayer()
     {
-        if (Input.GetMouseButton(0) && _grounded)
+        if (Input.touchCount == 1 && _grounded)//Input.GetMouseButton(0) && _grounded || 
         {
             _isInAir = false;
-            Vector2 _clickPosition = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            //Vector2 _clickPosition = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 _clickPosition = _mainCamera.ScreenToWorldPoint(Input.touches[0].position);
             float deltaX = _clickPosition.x - transform.position.x;
-            if (Mathf.Abs(deltaX) > 0.5f)
+            if (Mathf.Abs(deltaX) > 1f)
             {
                 _direction = deltaX > 0 ? 1 : -1;
                 
@@ -80,19 +71,12 @@ public class PlayerMovement : MonoBehaviour
         }
 
     }
-    private void Jump()
-    {
-        var vector = _jumpPower * new Vector3(_sideForce * _direction, _forceUp, 0);
-        _rigidbody.velocity = vector;
-        _isInAir = true;
-
-    }
-
+    
     private IEnumerator CheckFirstClick()
     {
         while (enabled)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.touchCount == 1)//Input.GetMouseButtonDown(0) ||
             {
                 yield return CheckForDoubleClick();
             }
@@ -106,10 +90,13 @@ public class PlayerMovement : MonoBehaviour
         float count = 0f;
         while (count < _doubleClickTimeLimit)
         {
-            if (Input.GetMouseButtonDown(0) && !_isInAir)
+            foreach (var touch in Input.touches)
             {
-                _isWantJump = true;
-                yield break;
+                if (touch.tapCount == 2 && !_isInAir)
+                {
+                    _isWantJump = true;
+                    yield break;
+                }
             }
             count += Time.deltaTime;
             yield return null;
@@ -123,17 +110,7 @@ public class PlayerMovement : MonoBehaviour
         _grounded = Physics2D.OverlapCircle(_groundCheckTransform.position, 0.3f, _groundCheckLayerMask);
     }
 
-    private void FlipSprite()
-    {
-        if (_direction == 1)
-        {
-            _spriteRenderer.flipX = false;
-        }
-        else if (_direction == -1)
-        {
-            _spriteRenderer.flipX = true;
-        }
-    }
+   
 
     private void SetProjectileActivity(bool isProjectileActive)
     {
