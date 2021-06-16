@@ -49,7 +49,6 @@ public class Participant : MonoBehaviour
     public void DecrementWalkNumber()
     {
         _walkNumber--;
-        _walkNumber = Mathf.Clamp(_walkNumber, 1, _allParticipants.GetParticipants().Count);
     }
     private void CheckAlive()
     {
