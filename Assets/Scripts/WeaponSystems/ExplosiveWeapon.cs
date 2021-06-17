@@ -76,7 +76,7 @@ public abstract class ExplosiveWeapon : Weapon
             distance *= _damageDistance;
             if (distance < _doneDistanceDamage)
             {
-                participant.GiveDamage(_damage / (int)distance);
+                participant.GiveDamage(_damage /(int)(distance + 1));
                 ThrowPlayer(participant.gameObject, distance);
             }
         }
@@ -103,7 +103,7 @@ public abstract class ExplosiveWeapon : Weapon
         if (player.TryGetComponent<Movement>(out Movement movement))
         {
             Vector2 explosionPos = transform.position;
-            movement.ThrowAway(explosionPos, _power / (int)distance);
+            movement.ThrowAway(explosionPos, _power / (int)(distance + 1));
         }
     }
     private void Explode()

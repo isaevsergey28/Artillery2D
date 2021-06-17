@@ -26,6 +26,7 @@ public class GameRound : MonoBehaviour
         _roundState = RoundState.Pause;
         ExplosiveWeapon.onExplosiveWeaponDestroy += StopRound;
         ColdWeapon.onColdWeaponDestroy += StopRound;
+        Participant.onDeath += NullifyRounds;
         _allParticipants = GameObject.FindObjectOfType<AllParticipants>();
     }
     private void OnDisable()
@@ -70,7 +71,10 @@ public class GameRound : MonoBehaviour
         StartCoroutine(SetPause());
         onChangeState?.Invoke(true);
     }
-
+    private void NullifyRounds(Participant participant)
+    {
+        _roundNumber = 0;
+    }
     private IEnumerator SetPause()
     {
         yield return new WaitForSeconds(3f);

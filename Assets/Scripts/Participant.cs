@@ -14,7 +14,7 @@ public class Participant : MonoBehaviour
 
     protected Movement _movement;
 
-    protected int _walkNumber;
+    [SerializeField] protected int _walkNumber;
 
     protected AllParticipants _allParticipants;
 
