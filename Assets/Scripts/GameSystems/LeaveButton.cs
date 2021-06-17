@@ -7,6 +7,7 @@ public class LeaveButton : MonoBehaviour
 {
     public void LoadMenu()
     {
+        BotInfoIndicator.staticBotNumber = 1;
         SceneManager.LoadScene("Menu");
     }
 }
